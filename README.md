@@ -4,7 +4,7 @@
 
 ## 在线使用
 
-https://save-token-xxx.vercel.app
+https://save-token-vupe.vercel.app/
 
 ## 它做什么
 
@@ -22,5 +22,4 @@ https://save-token-xxx.vercel.app
 ## 本地运行
 
 ```bash
-python -m http.server 8000
-# 打开 http://localhost:8000
+http://127.0.0.1:5500/index.html
