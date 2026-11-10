@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>save-token · 压缩你的 prompt</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f7f7f8; color: #1a1a1a;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: #666; font-size: 13px; margin-bottom: 20px; }
+
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .mode-btn {
+    padding: 6px 14px; border: 1px solid #ddd; background: #fff;
+    border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .mode-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .panels { grid-template-columns: 1fr; } }
+
+  .panel { display: flex; flex-direction: column; }
+  .panel label { font-size: 12px; color: #666; margin-bottom: 6px; }
+  textarea, .output {
+    width: 100%; min-height: 260px; padding: 12px;
+    border: 1px solid #ddd; border-radius: 8px; background: #fff;
+    font-family: ui-monospace, Consolas, monospace; font-size: 13px;
+    line-height: 1.6; resize: vertical;
+  }
+  .output { white-space: pre-wrap; word-break: break-word; overflow-y: auto; }
+
+  .stats { display: flex; gap: 24px; align-items: baseline; margin: 16px 0; }
+  .stat { font-size: 13px; color: #666; }
+  .stat b { font-size: 22px; color: #1a1a1a; margin-right: 4px; }
+  .pct b { color: #0a7d32; }
+
+  .actions { display: flex; gap: 8px; }
+  button.primary {
+    padding: 8px 18px; border: none; border-radius: 6px;
+    background: #1a1a1a; color: #fff; cursor: pointer; font-size: 14px;
+  }
+  button.primary:disabled { opacity: .4; cursor: not-allowed; }
+  button.secondary {
+    padding: 8px 18px; border: 1px solid #ddd; border-radius: 6px;
+    background: #fff; cursor: pointer; font-size: 14px;
+  }
+  .hint { font-size: 12px; color: #999; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>save-token</h1>
+  <div class="sub">粘贴你的 prompt，压掉多余 token。变量、代码、否定词不会被动。</div>
+
+  <div class="toolbar">
+    <button class="mode-btn active" data-mode="normal">简洁压缩</button>
+    <button class="mode-btn" data-mode="programming">编程模式</button>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <label>原始 prompt</label>
+      <textarea id="input" placeholder="在这里粘贴你的 prompt…"></textarea>
+    </div>
+    <div class="panel">
+      <label>压缩结果</label>
+      <div class="output" id="output"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">原始 <b id="orig">0</b> token</div>
+    <div class="stat">压缩后 <b id="comp">0</b> token</div>
+    <div class="stat pct">节省 <b id="pct">0%</b></div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="run" disabled>压缩</button>
+    <button class="secondary" id="copy" disabled>复制压缩版</button>
+  </div>
+  <div class="hint">token 数为近似估算，用于展示节省比例。变量占位符、代码块、URL 会原样保留。</div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  let rules = null;
+  let currentMode = 'normal';
+
+  fetch('./rules.json')
+    .then(r => r.json())
+    .then(data => {
+      rules = data;
+      document.getElementById('run').disabled = false;
+    })
+    .catch(() => {
+      document.getElementById('output').textContent = '加载 rules.json 失败，请用本地服务器打开（不要直接双击 html）。';
+    });
+
+  const inputEl = document.getElementById('input');
+  const outputEl = document.getElementById('output');
+  const origEl = document.getElementById('orig');
+  const compEl = document.getElementById('comp');
+  const pctEl = document.getElementById('pct');
+  const runBtn = document.getElementById('run');
+  const copyBtn = document.getElementById('copy');
+
+  function runCompress() {
+    if (!rules) return;
+    const text = inputEl.value;
+    if (!text.trim()) {
+      outputEl.textContent = '';
+      origEl.textContent = compEl.textContent = '0';
+      pctEl.textContent = '0%';
+      copyBtn.disabled = true;
+      return;
+    }
+    const r = window.compress(text, rules);
+    outputEl.textContent = r.compressed;
+    origEl.textContent = r.originalTokens;
+    compEl.textContent = r.compressedTokens;
+    const saved = r.originalTokens > 0
+      ? Math.round((1 - r.compressedTokens / r.originalTokens) * 100)
+      : 0;
+    pctEl.textContent = saved + '%';
+    copyBtn.disabled = !r.compressed;
+  }
+
+  runBtn.addEventListener('click', runCompress);
+  inputEl.addEventListener('input', () => { copyBtn.disabled = true; });
+
+  copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(outputEl.textContent).then(() => {
+      copyBtn.textContent = '已复制';
+      setTimeout(() => copyBtn.textContent = '复制压缩版', 1500);
+    });
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMode = btn.dataset.mode;
+      // 编程模式暂时与简洁压缩行为一致，仅作占位
+    });
+  });
+</script>
+</body>
+</html>

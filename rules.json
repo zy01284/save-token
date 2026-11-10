@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "options": {
+    "caseSensitive": false,
+    "wholeWordEn": true,
+    "keepNatural": false
+  },
+  "safeDelete": {
+    "zh": ["你好", "您好", "麻烦你", "非常感谢", "希望你能够", "我想让你"],
+    "en": ["hello", "hi there", "please help me", "thank you", "i want you to", "i would like you to", "as you know", "it is important to note that"]
+  },
+  "merge": {
+    "zh": [
+      { "from": "请帮我", "to": "帮我" },
+      { "from": "非常非常重要", "to": "非常重要" },
+      { "from": "仔细认真", "to": "仔细" }
+    ],
+    "en": [
+      { "from": "very very important", "to": "very important" },
+      { "from": "carefully and thoroughly", "to": "carefully" }
+    ]
+  },
+  "protectedTerms": {
+    "programming": ["JSON", "markdown", "API", "function", "class", "return", "分页", "接口", "变量", "数组", "对象", "字符串", "token", "prompt", "model", "agent"],
+    "negation": ["不要", "不能", "禁止", "必须", "务必", "not", "never", "must", "do not"],
+    "social": ["谢谢"]
+  },
+  "placeholderPatterns": [
+    "```[\\s\\S]*?```",
+    "`[^`\\n]+`",
+    "\\$\\{[^}]+\\}",
+    "\\{\\{[^}]+\\}\\}",
+    "\\{[^{}\\n]+\\}",
+    "</?[A-Za-z][^>]*>",
+    "https?://[^\\s\\u4e00-\\u9fff，。！？、）)]+"
+  ]
+}
