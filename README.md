@@ -4,7 +4,7 @@
 
 ## 在线使用
 
-https://save-token-asci.vercel.app/
+https://save-token.zh-cn.edgeone.cool/?eo_token=2050b61f03985b2eaa3bf9fc1a36a33a&eo_time=1794332497
 
 ## 它做什么
 
