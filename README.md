@@ -4,7 +4,7 @@
 
 ## 在线使用
 
-https://save-token-vupe.vercel.app/
+https://save-token-asci.vercel.app/
 
 ## 它做什么
 
