@@ -4,7 +4,7 @@
 
 ## 在线使用
 
-https://save-token.zh-cn.edgeone.cool/?eo_token=2050b61f03985b2eaa3bf9fc1a36a33a&eo_time=1794332497
+https://save-token.zh-cn.edgeone.cool/?eo_token=5d4b123a1067de6ac1f9836ae080b687&eo_time=1794358416
 
 ## 它做什么
 
